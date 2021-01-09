@@ -34,7 +34,8 @@
         </div>
         <div class="contenidoNegocio">
           <b-link v-if="negocio.sitioWeb != '' " :href="negocio.sitioWeb">Sitio web</b-link>
-          <b-button v-if="negocio.permitirReservaciones && idUsuario != undefined" pill variant="outline-info" class="botonInformacion" :to="{ name: 'VerNegocio', params: { id: negocio.idNegocio }}">Hacer una
+          <b-button v-if="negocio.permitirReservaciones && idUsuario != undefined" pill variant="outline-info" class="botonInformacion"
+            :to="{ name: 'VerNegocio', params: { id: negocio.idNegocio }}">Hacer una
             reservación</b-button>
           <b-button pill variant="outline-info" class="ml-auto" :to="{ name: 'VerNegocio', params: { id: negocio.idNegocio }}">Mas
             información</b-button>

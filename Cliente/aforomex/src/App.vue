@@ -25,7 +25,7 @@ export default {
 
 <style>
 #app {
-  font-family: Georgia, "Times New Roman", Times, serif;
+  font-family: 'Times New Roman', Times, serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-align: center;

@@ -122,5 +122,19 @@ namespace AforoMexAPI.Controllers
                 return null;
             }
         }
+
+        [HttpGet]
+        [Route("reservacionesSemana/{idUsuario}")]
+        public async Task<ActionResult<IEnumerable<Reservacione>>> GetReservacionesSemanaUsuario(int idUsuario)
+        {
+            DateTime hoy = DateTime.Now;
+            var reservaciones = await _context.Reservaciones.Where(x => x.IdUsuario == idUsuario && x.FechaReserva.Date.CompareTo(hoy.Date) >= 0).ToListAsync();
+            foreach (var reservacion in reservaciones)
+            {
+                var negocio = await _context.Negocios.FirstOrDefaultAsync(x => x.IdNegocio == reservacion.IdNegocio);
+                reservacion.IdNegocioNavigation = new Negocio() { Nombre =  negocio.Nombre };
+            }
+            return reservaciones;
+        }
     }
 }

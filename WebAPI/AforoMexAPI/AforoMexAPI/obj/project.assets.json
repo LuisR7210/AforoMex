@@ -9144,19 +9144,19 @@
     ]
   },
   "packageFolders": {
-    "C:\\Users\\IS Infinite Stratos\\.nuget\\packages\\": {}
+    "C:\\Users\\IS Aorus\\.nuget\\packages\\": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\IS Infinite Stratos\\source\\repos\\AforoMexAPI\\AforoMexAPI\\AforoMexAPI.csproj",
+      "projectUniqueName": "C:\\Users\\IS Aorus\\Documents\\AforoMex\\WebAPI\\AforoMexAPI\\AforoMexAPI\\AforoMexAPI.csproj",
       "projectName": "AforoMexAPI",
-      "projectPath": "C:\\Users\\IS Infinite Stratos\\source\\repos\\AforoMexAPI\\AforoMexAPI\\AforoMexAPI.csproj",
-      "packagesPath": "C:\\Users\\IS Infinite Stratos\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\IS Infinite Stratos\\source\\repos\\AforoMexAPI\\AforoMexAPI\\obj\\",
+      "projectPath": "C:\\Users\\IS Aorus\\Documents\\AforoMex\\WebAPI\\AforoMexAPI\\AforoMexAPI\\AforoMexAPI.csproj",
+      "packagesPath": "C:\\Users\\IS Aorus\\.nuget\\packages\\",
+      "outputPath": "C:\\Users\\IS Aorus\\Documents\\AforoMex\\WebAPI\\AforoMexAPI\\AforoMexAPI\\obj\\",
       "projectStyle": "PackageReference",
       "configFilePaths": [
-        "C:\\Users\\IS Infinite Stratos\\AppData\\Roaming\\NuGet\\NuGet.Config",
+        "C:\\Users\\IS Aorus\\AppData\\Roaming\\NuGet\\NuGet.Config",
         "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
       ],
       "originalTargetFrameworks": [
@@ -9168,6 +9168,7 @@
       },
       "frameworks": {
         "netcoreapp3.1": {
+          "targetAlias": "netcoreapp3.1",
           "projectReferences": {}
         }
       },
@@ -9179,6 +9180,7 @@
     },
     "frameworks": {
       "netcoreapp3.1": {
+        "targetAlias": "netcoreapp3.1",
         "dependencies": {
           "Microsoft.AspNet.WebApi.Cors": {
             "target": "Package",
@@ -9225,7 +9227,7 @@
             "privateAssets": "all"
           }
         },
-        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\3.1.101\\RuntimeIdentifierGraph.json"
+        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\5.0.101\\RuntimeIdentifierGraph.json"
       }
     }
   },
