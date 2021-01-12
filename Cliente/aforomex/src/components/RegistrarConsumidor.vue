@@ -36,18 +36,23 @@
         </div>
       </b-form>
     </div>
+
+    <b-modal id="alerta" centered ok-only title="Error al cargar las reservaciones" header-bg-variant="danger" header-text-variant="light">
+      <p class="my-4">{{ mensajeAlerta }}</p>
+    </b-modal>
   </div>
 </template>
 
 <script>
 import axios from "axios";
-import { EventBus } from './bus.js';
+import { EventBus } from "./bus.js";
 export default {
   name: "RegistrarConsumidor",
 
   data() {
     return {
       hoy: new Date().toISOString().slice(0, 10),
+      mensajeAlerta: "",
       form: {
         nombre: "",
         apellidos: "",
@@ -62,6 +67,7 @@ export default {
   methods: {
     onSubmit(event) {
       event.preventDefault();
+      var vm = this;
       axios
         .post("https://localhost:5001/AforoMex/Usuarios", {
           Nombre: this.form.nombre,
@@ -73,17 +79,20 @@ export default {
           Rol: "consumidor",
         })
         .then((response) => {
-          alert("Registro exitoso");
-          localStorage.setItem("idUsuario", response.data.idUsuario);
-          localStorage.setItem("usuario", response.data.nombre);
-          localStorage.setItem("rol", response.data.rol);
+          localStorage.setItem("idUsuario", response.data.objeto.idUsuario);
+          localStorage.setItem("usuario", response.data.objeto.nombre);
+          localStorage.setItem("rol", response.data.objeto.rol);
           EventBus.$emit("iniciarSesion");
           this.$router.push({ name: "Inicio" });
         })
-        .catch(() => {
-          alert(
-            "Error al conectar con el servidor. Revise su conexión a internet e inténtelo de nuevo"
-          );
+        .catch((e) => {
+          if (e.response.data.error && e.response.status == 409) {
+            vm.mensajeAlerta = e.response.data.mensaje;
+          } else {
+            vm.mensajeAlerta =
+              "Error en el servidor de AforoMex. Inténtelo de nuevo más tarde.";
+          }
+          vm.$bvModal.show("alerta");
         });
     },
   },

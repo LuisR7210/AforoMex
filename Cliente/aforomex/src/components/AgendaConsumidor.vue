@@ -120,7 +120,7 @@ export default {
 #contenedorNegocio {
   margin-left: auto;
   margin-right: auto;
-  width: fit-content;
+  max-width: fit-content;
   margin-top: 10px;
   margin-bottom: 100px;
   border-style: double;

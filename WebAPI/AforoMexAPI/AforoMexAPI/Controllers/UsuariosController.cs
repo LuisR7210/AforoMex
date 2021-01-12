@@ -75,11 +75,21 @@ namespace AforoMexAPI.Controllers
 
         // POST: api/Usuarios
         [HttpPost]
-        public async Task<ActionResult<Usuario>> PostUsuario([Bind("Nombre,Apellidos,Telefono,Correo,FechaNacimiento,Contrasena,Rol")] Usuario usuario)
+        public async Task<ActionResult<Mensaje>> PostUsuario([Bind("Nombre,Apellidos,Telefono,Correo,FechaNacimiento,Contrasena,Rol")] Usuario usuario)
         {
+            var mensaje = new Mensaje();
+            var usuarioRepetido = await _context.Usuarios.FirstOrDefaultAsync(x => x.Correo.Equals(usuario.Correo));
+            if (usuarioRepetido != null)
+            {
+                mensaje.error = true;
+                mensaje.mensaje = "Ya existe un usuario registrado con ese correo";
+                return StatusCode(StatusCodes.Status409Conflict, mensaje);
+            }
+            usuario.Correo = usuario.Correo.ToLower();
             _context.Usuarios.Add(usuario);
             await _context.SaveChangesAsync();
-            return CreatedAtAction(nameof(GetUsuario), new { id = usuario.IdUsuario }, usuario);
+            mensaje.objeto = usuario;
+            return CreatedAtAction(nameof(GetUsuario), new { id = usuario.IdUsuario }, mensaje);
         }
 
         // DELETE: api/Usuarios/5
@@ -105,21 +115,57 @@ namespace AforoMexAPI.Controllers
 
         [HttpPost]
         [Route("login")]
-        public async Task<ActionResult<Usuario>> IniciarSesion([Bind("Correo,Contrasena")] Usuario usuario)
+        public async Task<ActionResult<Mensaje>> IniciarSesion([Bind("Correo,Contrasena")] Usuario usuario)
         {
+            var mensaje = new Mensaje();
             var usuarioEncontrado = await _context.Usuarios.FirstOrDefaultAsync(x => x.Correo.Equals(usuario.Correo.ToLower()) && x.Contrasena.Equals(usuario.Contrasena));
             if (usuarioEncontrado != null)
             {
-                var usuarioRegreso = new Usuario();
-                usuarioRegreso.IdUsuario = usuarioEncontrado.IdUsuario;
-                usuarioRegreso.Nombre = usuarioEncontrado.Nombre;
-                usuarioRegreso.Correo = usuarioEncontrado.Correo;
-                usuarioRegreso.Rol = usuarioEncontrado.Rol;
-                return usuarioRegreso;
+                if (usuarioEncontrado.Rol.Equals("consumidor"))
+                {
+                    var usuarioRegreso = new Usuario();
+                    usuarioRegreso.IdUsuario = usuarioEncontrado.IdUsuario;
+                    usuarioRegreso.Nombre = usuarioEncontrado.Nombre;
+                    usuarioRegreso.Correo = usuarioEncontrado.Correo;
+                    usuarioRegreso.Rol = usuarioEncontrado.Rol;
+                    mensaje.objeto = usuarioRegreso;
+                }
+                else
+                {
+                    var negocioEncontrado = await _context.Negocios.FirstOrDefaultAsync(x => x.IdUsuario == usuarioEncontrado.IdUsuario);
+                    var negocioRegreso = new Negocio();
+                    negocioRegreso.IdNegocio = negocioEncontrado.IdNegocio;
+                    negocioRegreso.Nombre = negocioEncontrado.Nombre;
+                    negocioRegreso.IdUsuarioNavigation = new Usuario() { IdUsuario = usuarioEncontrado.IdUsuario, Rol = usuarioEncontrado.Rol};
+                    mensaje.objeto = negocioRegreso;
+                }
+                return mensaje;
             }
             else
             {
-                return null;
+                mensaje.error = true;
+                mensaje.mensaje = "Correo y/o contraseña inválidos";
+                return StatusCode(StatusCodes.Status401Unauthorized, mensaje);
+            }
+        }
+
+        [HttpPost]
+        [Route("verificarCorreo")]
+        public async Task<ActionResult<Mensaje>> VerificarCorreo([Bind("Correo")] Usuario usuario)
+        {
+            var mensaje = new Mensaje();
+            var usuarioEncontrado = await _context.Usuarios.FirstOrDefaultAsync(x => x.Correo.Equals(usuario.Correo.ToLower()));
+            if (usuarioEncontrado != null)
+            {
+                mensaje.error = true;
+                mensaje.mensaje = "Ya existe un usuario registrado con ese correo";
+                return StatusCode(StatusCodes.Status409Conflict, mensaje);
+            }
+            else
+            {
+                mensaje.error = false;
+                mensaje.mensaje = "Correo único listo para ser registrado";
+                return mensaje;
             }
         }
 

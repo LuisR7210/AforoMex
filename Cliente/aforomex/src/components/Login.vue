@@ -57,6 +57,10 @@
         </b-row>
       </b-card-footer>
     </b-card>
+
+    <b-modal id="alerta" centered ok-only title="Error al iniciar sesión" header-bg-variant="danger" header-text-variant="light">
+      <p class="my-4"> {{ mensajeAlerta }}</p>
+    </b-modal>
   </div>
 </template>
 
@@ -72,33 +76,38 @@ export default {
         contrasena: "",
       },
       show: true,
+      mensajeAlerta: "",
     };
   },
 
   methods: {
     onSubmit(event) {
       event.preventDefault();
+      var vm = this;
       axios
         .post("https://localhost:5001/AforoMex/Usuarios/login", {
           Correo: this.form.correo,
           Contrasena: this.form.contrasena
         })
         .then((response) => {
-          if (response.data != null) {
-            localStorage.setItem("idUsuario", response.data.idUsuario);
-            localStorage.setItem("usuario", response.data.nombre);
-            localStorage.setItem("rol", response.data.rol);
+          if (response.data.objeto != null) {
+            localStorage.setItem("idUsuario", response.data.objeto.idUsuario);
+            localStorage.setItem("usuario", response.data.objeto.nombre);
+            localStorage.setItem("rol", response.data.objeto.rol);
             EventBus.$emit('iniciarSesion');
             this.$router.push({ name: "Inicio"})
           } else {
-            alert("Datos incorrectos. Revíselos e inténtelo de nuevo");
+            vm.mensajeAlerta = "Error en el servidor de AforoMex. Inténtelo de nuevo más tarde."
+            vm.$bvModal.show("alerta");
           }
         })
         .catch((e) => {
-          console.log(e);
-          alert(
-            "Error al conectar con el servidor. Revise su conexión a internet e inténtelo de nuevo"
-          );
+          if (e.response.data.error && e.response.status == 401) {
+            vm.mensajeAlerta = e.response.data.mensaje + ". Revíselos e inténtelo de nuevo.";
+          } else {
+            vm.mensajeAlerta = "Error en el servidor de AforoMex. Inténtelo de nuevo más tarde."
+          }
+          vm.$bvModal.show("alerta");
         });
     },
   },

@@ -57,7 +57,7 @@
       </b-nav>
       <b-nav vertical :hidden="ocultarNegocio">
         <b-nav-item link-classes="text-light">Actualizar cupo</b-nav-item>
-        <b-nav-item link-classes="text-light">Ver Agenda del negocio</b-nav-item>
+        <b-nav-item :to="{ name: 'AgendaNegocio' }" link-classes="text-light">Ver Agenda del negocio</b-nav-item>
       </b-nav>
     </b-sidebar>
   </div>

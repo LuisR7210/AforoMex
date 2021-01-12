@@ -7,6 +7,7 @@ import Login from '@/components/Login'
 import LoginNegocio from '@/components/LoginNegocio'
 import VerNegocio from '@/components/VerNegocio'
 import AgendaConsumidor from '@/components/AgendaConsumidor'
+import AgendaNegocio from '@/components/AgendaNegocio'
 
 Vue.use(VueRouter)
 
@@ -45,6 +46,11 @@ const routes = [
     path: '/agendaConsumidor',
     name: 'AgendaConsumidor',
     component: AgendaConsumidor
+  },
+  {
+    path: '/agendaNegocio',
+    name: 'AgendaNegocio',
+    component: AgendaNegocio
   }
 ]
 

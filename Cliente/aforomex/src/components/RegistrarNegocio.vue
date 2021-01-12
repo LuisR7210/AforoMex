@@ -208,6 +208,10 @@
       </b-form>
     </div>
 
+    <b-modal id="alerta" centered ok-only title="Error al iniciar sesión" header-bg-variant="danger" header-text-variant="light">
+      <p class="my-4"> {{ mensajeAlerta }}</p>
+    </b-modal>
+
   </div>
 </template>
 
@@ -220,6 +224,7 @@ export default {
   data() {
     return {
       hoy: new Date().toISOString().slice(0, 10),
+      mensajeAlerta: "",
       ocultarPersonales: false,
       form: {
         nombre: "",
@@ -295,8 +300,24 @@ export default {
     //Funciones datos del administrador
     onSubmitPersonales(event) {
       event.preventDefault();
-      this.ocultarDatosNegocio = false;
-      this.ocultarPersonales = true;
+      var vm = this;
+      axios
+        .post("https://localhost:5001/AforoMex/Usuarios/verificarCorreo", {
+          correo: vm.form.correo,
+        })
+        .then(() => {
+          vm.ocultarDatosNegocio = false;
+          vm.ocultarPersonales = true;
+        })
+        .catch((e) => {
+          if (e.response.data.error && e.response.status == 409) {
+            vm.mensajeAlerta = e.response.data.mensaje;
+          } else {
+            vm.mensajeAlerta =
+              "Error en el servidor de AforoMex. Inténtelo de nuevo más tarde.";
+          }
+          vm.$bvModal.show("alerta");
+        });
     },
     //Funciones datos del negocio
     onSubmitNegocio(event) {
@@ -408,30 +429,7 @@ export default {
     },
     onSubmitAforo(event) {
       event.preventDefault();
-      this.registrarUsuario();
-    },
-    registrarUsuario: function () {
-      axios
-        .post("https://localhost:5001/AforoMex/Usuarios", {
-          Nombre: this.form.nombre,
-          Apellidos: this.form.apellidos,
-          Telefono: this.form.telefono,
-          Correo: this.form.correo,
-          FechaNacimiento: this.form.nacimiento,
-          Contrasena: this.form.contrasena,
-          Rol: "negocio",
-        })
-        .then((response) => {
-          localStorage.setItem("idUsuario", response.data.idUsuario);
-          localStorage.setItem("usuario", response.data.nombre);
-          localStorage.setItem("rol", response.data.rol);
-          this.registrarNegocio();
-        })
-        .catch(() => {
-          alert(
-            "Error al conectar con el servidor. Revise su conexión a internet e inténtelo de nuevo"
-          );
-        });
+      this.registrarNegocio();
     },
     registrarNegocio: function () {
       let horariosVerificados = this.horarios.filter(
@@ -451,6 +449,7 @@ export default {
       this.formDireccion.numeroInterior = parseInt(
         this.formDireccion.numeroInterior
       );
+      var vm = this;
       axios
         .post("https://localhost:5001/AforoMex/Negocios", {
           nombre: this.formNegocio.nombre,
@@ -469,18 +468,26 @@ export default {
           idUsuario: parseInt(localStorage["idUsuario"]),
           direcciones: [this.formDireccion],
           horarios: horariosVerificados,
+          idUsuarioNavigation: {
+            Nombre: this.form.nombre,
+            apellidos: this.form.apellidos,
+            telefono: this.form.telefono,
+            correo: this.form.correo,
+            fechaNacimiento: this.form.nacimiento,
+            contrasena: this.form.contrasena,
+          },
         })
         .then((response) => {
-          localStorage.setItem("idUsuario", response.data.idUsuario);
+          localStorage.setItem("idUsuario", response.data.idNegocio);
           localStorage.setItem("usuario", response.data.nombre);
-          localStorage.setItem("rol", "negocio");
+          localStorage.setItem("rol", response.data.idUsuarioNavigation.rol);
           EventBus.$emit("iniciarSesion");
           this.$router.push({ name: "Inicio" });
         })
         .catch(() => {
-          alert(
-            "Error al conectar con el servidor. Revise su conexión a internet e inténtelo de nuevo"
-          );
+          vm.mensajeAlerta =
+            "Error en el servidor de AforoMex. Inténtelo de nuevo más tarde.";
+          vm.$bvModal.show("alerta");
         });
     },
   },
