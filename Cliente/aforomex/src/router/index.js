@@ -8,6 +8,10 @@ import LoginNegocio from '@/components/LoginNegocio'
 import VerNegocio from '@/components/VerNegocio'
 import AgendaConsumidor from '@/components/AgendaConsumidor'
 import AgendaNegocio from '@/components/AgendaNegocio'
+import PerfilUsuario from '@/components/PerfilUsuario'
+import ActualizarCupo from '@/components/ActualizarCupo'
+import EditarNegocio from '@/components/EditarNegocio'
+import HacerReservacion from '@/components/HacerReservacion'
 
 Vue.use(VueRouter)
 
@@ -51,6 +55,26 @@ const routes = [
     path: '/agendaNegocio',
     name: 'AgendaNegocio',
     component: AgendaNegocio
+  },
+  {
+    path: '/perfil',
+    name: 'PerfilUsuario',
+    component: PerfilUsuario
+  },
+  {
+    path: '/cupoNegocio',
+    name: 'ActualizarCupo',
+    component: ActualizarCupo
+  },
+  {
+    path: '/editarNegocio',
+    name: 'EditarNegocio',
+    component: EditarNegocio
+  },
+  {
+    path: '/HacerReservaciones/:id',
+    name: 'HacerReservaciones',
+    component: HacerReservacion
   }
 ]
 

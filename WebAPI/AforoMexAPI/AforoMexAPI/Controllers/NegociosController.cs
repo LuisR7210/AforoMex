@@ -46,8 +46,6 @@ namespace AforoMexAPI.Controllers
         }
 
         // PUT: api/Negocios/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to, for
-        // more details, see https://go.microsoft.com/fwlink/?linkid=2123754.
         [HttpPut("{id}")]
         public async Task<IActionResult> PutNegocio(int id, Negocio negocio)
         {
@@ -55,9 +53,19 @@ namespace AforoMexAPI.Controllers
             {
                 return BadRequest();
             }
-
+            var horariosNegocio = await _context.Horarios.Where(h => h.IdNegocio == negocio.IdNegocio).ToListAsync();
+            foreach (var horario in horariosNegocio)
+            {
+                _context.Horarios.Remove(horario);
+            }
+            await _context.SaveChangesAsync();
             _context.Entry(negocio).State = EntityState.Modified;
-
+            var direccion = negocio.Direcciones.First();
+            _context.Entry(direccion).State = EntityState.Modified;
+            foreach (var horario in negocio.Horarios)
+            {
+                _context.Horarios.Add(horario);
+            }
             try
             {
                 await _context.SaveChangesAsync();
@@ -169,6 +177,131 @@ namespace AforoMexAPI.Controllers
             intervalo.FechaInicio = new DateTime(fecha.Year, totalMeses - offset, 1);
             intervalo.FechaFin = new DateTime(fecha.Year, totalMeses, DateTime.DaysInMonth(fecha.Year, totalMeses));
             return intervalo;
+        }
+
+        // PUT: api/Negocios/5
+        [HttpPut("actualizarCupo/{id}")]
+        public async Task<IActionResult> ActualizarCupo(int id, [Bind("IdUsuario, IdNegocio, CupoOcupado")]Negocio negocio)
+        {
+            if (id != negocio.IdNegocio)
+            {
+                return BadRequest();
+            }
+            var negocioEncontrado = await _context.Negocios.FirstOrDefaultAsync(x => x.IdNegocio == id && x.IdUsuario == negocio.IdUsuario);
+            negocioEncontrado.CupoOcupado = negocio.CupoOcupado;
+            _context.Entry(negocioEncontrado).State = EntityState.Modified;
+
+            try
+            {
+                await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                if (!NegocioExists(id))
+                {
+                    return NotFound();
+                }
+                else
+                {
+                    throw;
+                }
+            }
+
+            return NoContent();
+        }
+
+        [HttpGet]
+        [Route("categorias")]
+        public async Task<ActionResult<IEnumerable<string>>> GetCategorias()
+        {
+            var categorias = new List<string>();
+            foreach (var negocio in await _context.Negocios.ToListAsync())
+            {
+                if (!categorias.Contains(negocio.Categoria))
+                {
+                    categorias.Add(negocio.Categoria);
+                }
+            }
+            return categorias;
+        }
+
+        [HttpGet]
+        [Route("buscarNegocios")]
+        public async Task<ActionResult<IEnumerable<Negocio>>> BuscarNegocios(string nombre, string ciudad, string colonia, string categoria)
+        {
+            if (nombre == null)
+                nombre = "";
+            if (ciudad == null)
+                ciudad = "";
+            if (colonia == null)
+                colonia = "";
+            if (categoria == null)
+                categoria = "";
+            var negociosEncontrados = await _context.Negocios.Where(x => x.Nombre.ToLower().Contains(nombre.ToLower()) && x.Direcciones.First().Ciudad.Contains(ciudad) 
+            && x.Direcciones.First().Colonia.Contains(colonia) && x.Categoria.ToLower().Contains(categoria.ToLower())).ToListAsync();
+            return negociosEncontrados;
+        }
+
+        // POST: api/Reservaciones
+        [HttpPost]
+        [Route("reservaciones/post")]
+        public async Task<ActionResult<Mensaje>> PostReservacion([Bind("FechaReserv,NumLugares,Estado,IdUsuario,IdNegocio")] Reservacione reservacion)
+        {
+            //Console.WriteLine("--------------------------------------------------");
+            //Console.WriteLine("datos enviados: "+reservacion.Estado+", "+reservacion.FechaReserva+", "+reservacion.IdNegocio+", "+reservacion.IdUsuario+", "+reservacion.NumLugares);
+            //Console.WriteLine("--------------------------------------------------");
+            var mensaje = new Mensaje();
+            /////////////////////////validacion de lugares////////////////////////////
+            var reservaciones = await _context.Reservaciones.Where(x => x.IdNegocio == reservacion.IdNegocio).ToListAsync();
+            var negocio = await _context.Negocios.FindAsync(reservacion.IdNegocio);
+            var listaReservacioes = negocio.Reservaciones.ToList();
+            var reservacionesDia = new List<Reservacione>();
+            DateTime fechaRes = DateTime.Parse(reservacion.Estado);
+            DateTime limI = fechaRes.AddHours(-1);
+            DateTime limS = fechaRes.AddHours(2);
+            //Console.WriteLine("" +
+            //"dias: "+fechaRes.Day+" mes "+fechaRes.Month+" año: "+fechaRes.Year+" tamaño:"+listaReservacioes.Count+" otra: "+reservaciones.Count);
+            foreach (Reservacione reser in reservaciones)
+            {
+                if (fechaRes.Day == reser.FechaReserva.Day && fechaRes.Month == reser.FechaReserva.Month && fechaRes.Year == reser.FechaReserva.Year)
+                {
+                    reservacionesDia.Add(reser);
+                }
+            }
+            //Console.WriteLine("res dia: "+reservacionesDia.Count);
+            var limiteARes = negocio.Aforo * negocio.AforoReservaciones;
+            int intentoARes = 0;
+            foreach (Reservacione res in reservacionesDia)
+            {
+                if (res.FechaReserva > limI && res.FechaReserva < limS)
+                {
+                    Console.WriteLine("1: " + res.FechaReserva + " > " + limI + " && " + res.FechaReserva + " < " + limS);
+                    intentoARes += res.NumLugares;
+                }
+            }
+            Console.WriteLine("los datos a comparar son: " + intentoARes + reservacion.NumLugares + " 11 " + limiteARes);
+            if (intentoARes + reservacion.NumLugares > limiteARes)
+            {
+                mensaje.error = true;
+                mensaje.mensaje = "No es posible crear una reservacion" +
+                    "en esta fecha y hora, por que ya hay muchas reservaciones para ese momento. " +
+                    "Prueba con otra fecha o con menos lugares";
+                return StatusCode(StatusCodes.Status409Conflict, mensaje);
+            }
+            ///////////////////////////////////////////////////////////////
+            var nuevaReservacion = new Reservacione();
+            nuevaReservacion.Estado = "Vigente";
+            nuevaReservacion.FechaReserva = DateTime.Parse(reservacion.Estado);
+            nuevaReservacion.IdNegocio = reservacion.IdNegocio;
+            nuevaReservacion.IdUsuario = reservacion.IdUsuario;
+            nuevaReservacion.NumLugares = reservacion.NumLugares;
+            Console.WriteLine("--------------------------------------------------");
+            Console.WriteLine("DATOS GUARDADOS: " + nuevaReservacion.Estado + ", " + nuevaReservacion.FechaReserva + ", " + nuevaReservacion.IdNegocio + ", " + nuevaReservacion.IdUsuario + ", " + nuevaReservacion.NumLugares);
+            Console.WriteLine("--------------------------------------------------");
+            _context.Reservaciones.Add(nuevaReservacion);
+            await _context.SaveChangesAsync();
+            mensaje.objeto = nuevaReservacion;
+            return CreatedAtAction(nameof(GetNegocio), new { id = nuevaReservacion.IdReservacion }, mensaje);
         }
     }
 }

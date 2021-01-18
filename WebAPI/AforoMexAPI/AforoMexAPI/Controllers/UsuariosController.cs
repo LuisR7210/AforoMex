@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using AforoMexAPI.Models;
+using Microsoft.AspNetCore.Cryptography.KeyDerivation;
 
 namespace AforoMexAPI.Controllers
 {
@@ -42,16 +43,14 @@ namespace AforoMexAPI.Controllers
         }
 
         // PUT: api/Usuarios/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to, for
-        // more details, see https://go.microsoft.com/fwlink/?linkid=2123754.
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutUsuario(int id, Usuario usuario)
+        public async Task<IActionResult> PutUsuario(int id, [Bind("IdUsuario, Nombre,Apellidos,Telefono,Correo,FechaNacimiento,Contrasena")] Usuario usuario)
         {
             if (id != usuario.IdUsuario)
             {
                 return BadRequest();
             }
-
+            usuario.Rol = "consumidor";
             _context.Entry(usuario).State = EntityState.Modified;
 
             try
@@ -75,7 +74,7 @@ namespace AforoMexAPI.Controllers
 
         // POST: api/Usuarios
         [HttpPost]
-        public async Task<ActionResult<Mensaje>> PostUsuario([Bind("Nombre,Apellidos,Telefono,Correo,FechaNacimiento,Contrasena,Rol")] Usuario usuario)
+        public async Task<ActionResult<Mensaje>> PostUsuario([Bind("Nombre,Apellidos,Telefono,Correo,FechaNacimiento,Contrasena")] Usuario usuario)
         {
             var mensaje = new Mensaje();
             var usuarioRepetido = await _context.Usuarios.FirstOrDefaultAsync(x => x.Correo.Equals(usuario.Correo));
@@ -86,6 +85,8 @@ namespace AforoMexAPI.Controllers
                 return StatusCode(StatusCodes.Status409Conflict, mensaje);
             }
             usuario.Correo = usuario.Correo.ToLower();
+            usuario.Contrasena = this.ObtenerHash(usuario.Contrasena);
+            usuario.Rol = "consumidor";
             _context.Usuarios.Add(usuario);
             await _context.SaveChangesAsync();
             mensaje.objeto = usuario;
@@ -118,9 +119,16 @@ namespace AforoMexAPI.Controllers
         public async Task<ActionResult<Mensaje>> IniciarSesion([Bind("Correo,Contrasena")] Usuario usuario)
         {
             var mensaje = new Mensaje();
-            var usuarioEncontrado = await _context.Usuarios.FirstOrDefaultAsync(x => x.Correo.Equals(usuario.Correo.ToLower()) && x.Contrasena.Equals(usuario.Contrasena));
+            var usuarioEncontrado = await _context.Usuarios.FirstOrDefaultAsync(x => x.Correo.Equals(usuario.Correo.ToLower()));
             if (usuarioEncontrado != null)
             {
+                String contreseñaHasheada = ObtenerHash(usuario.Contrasena);
+                if (!contreseñaHasheada.Equals(usuarioEncontrado.Contrasena))
+                {
+                    mensaje.error = true;
+                    mensaje.mensaje = "Contraseña inválida";
+                    return StatusCode(StatusCodes.Status401Unauthorized, mensaje);
+                }
                 if (usuarioEncontrado.Rol.Equals("consumidor"))
                 {
                     var usuarioRegreso = new Usuario();
@@ -144,9 +152,19 @@ namespace AforoMexAPI.Controllers
             else
             {
                 mensaje.error = true;
-                mensaje.mensaje = "Correo y/o contraseña inválidos";
+                mensaje.mensaje = "Correo inválido";
                 return StatusCode(StatusCodes.Status401Unauthorized, mensaje);
             }
+        }
+
+        private String ObtenerHash(string contraseña)
+        {
+            return Convert.ToBase64String(KeyDerivation.Pbkdf2(
+                password: contraseña,
+                salt: Convert.FromBase64String("AforoMex"),
+                prf: KeyDerivationPrf.HMACSHA1,
+                iterationCount: 10000,
+                numBytesRequested: 256 / 8));
         }
 
         [HttpPost]
@@ -181,6 +199,37 @@ namespace AforoMexAPI.Controllers
                 reservacion.IdNegocioNavigation = new Negocio() { Nombre =  negocio.Nombre };
             }
             return reservaciones;
+        }
+
+        // PUT: api/Usuarios/5
+        [HttpPut("cancelarReservacion/{id}")]
+        public async Task<IActionResult> CancelarReservacion(int id, [Bind("IdUsuario")] Usuario usuario)
+        {
+            var reservacionCancelada = await _context.Reservaciones.FirstOrDefaultAsync(x => x.IdReservacion == id && x.IdUsuario == usuario.IdUsuario);
+            if (reservacionCancelada == null)
+            {
+                return BadRequest();
+            }
+            reservacionCancelada.Estado = "Cancelada";
+            _context.Entry(reservacionCancelada).State = EntityState.Modified;
+
+            try
+            {
+                await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                if (!_context.Reservaciones.Any(e => e.IdReservacion == id))
+                {
+                    return NotFound();
+                }
+                else
+                {
+                    throw;
+                }
+            }
+
+            return NoContent();
         }
     }
 }

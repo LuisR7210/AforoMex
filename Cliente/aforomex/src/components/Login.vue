@@ -1,58 +1,32 @@
 <template>
   <div>
 
-    <b-card
-      no-body
-      class="overflow-hidden"
-      border-variant="primary"
-    >
-    <b-card-header><h3>Iniciar sesión</h3></b-card-header>
-    <p>Bienvenido, entra a tú cuenta</p>
+    <b-card no-body class="overflow-hidden" border-variant="primary">
+      <b-card-header>
+        <h3>Iniciar sesión</h3>
+      </b-card-header>
+      <p>Bienvenido, entra a tú cuenta</p>
 
-    <b-form @submit="onSubmit" v-if="show">
-      <b-form-group
-        class="add-style"
-        label="Correo electrónico:"
-        label-for="input-correo"
-      >
-        <b-form-input
-          id="input-correo"
-          v-model="form.correo"
-          type="email"
-          placeholder="Ingresa tu correo electrónico"
-          maxlength="80"
-          required
-        ></b-form-input>
-      </b-form-group>
+      <b-form @submit="onSubmit" v-if="show">
+        <b-form-group class="add-style" label="Correo electrónico:" label-for="input-correo">
+          <b-form-input id="input-correo" v-model="form.correo" type="email" placeholder="Ingresa tu correo electrónico" maxlength="80" required>
+          </b-form-input>
+        </b-form-group>
 
-      <b-form-group
-            class="add-style"
-            id="grupoContrasena"
-            label="Contraseña:"
-            label-for="input-contrasena"
-          >
-            <b-form-input
-              id="input-contrasena"
-              v-model="form.contrasena"
-              type="password"
-              placeholder="Ingresa tu contraseña"
-              maxlength="50"
-              minlength="8"
-              required
-            ></b-form-input>
-          </b-form-group>
+        <b-form-group class="add-style" id="grupoContrasena" label="Contraseña:" label-for="input-contrasena">
+          <b-form-input id="input-contrasena" v-model="form.contrasena" type="password" placeholder="Ingresa tu contraseña" maxlength="50"
+            minlength="8" required></b-form-input>
+        </b-form-group>
 
-      <b-button id="btnIniciarSesion" type="submit" variant="primary">Iniciar sesión</b-button>
-    </b-form>
+        <b-button id="btnIniciarSesion" type="submit" variant="primary">Iniciar sesión</b-button>
+      </b-form>
       <b-card-footer>
         <b-row no-gutters>
           <b-col md="6">
             <p>¿No tienes cuenta?</p>
           </b-col>
           <b-col md="6">
-            <b-button variant="primary" :to="{ name: 'RegistrarConsumidor' }"
-              >Registrarme</b-button
-            >
+            <b-button variant="primary" :to="{ name: 'RegistrarConsumidor' }">Registrarme</b-button>
           </b-col>
         </b-row>
       </b-card-footer>
@@ -66,7 +40,7 @@
 
 <script>
 import axios from "axios";
-import { EventBus } from './bus.js';
+import { EventBus } from "./bus.js";
 export default {
   name: "Login",
   data() {
@@ -87,25 +61,28 @@ export default {
       axios
         .post("https://localhost:5001/AforoMex/Usuarios/login", {
           Correo: this.form.correo,
-          Contrasena: this.form.contrasena
+          Contrasena: this.form.contrasena,
         })
         .then((response) => {
           if (response.data.objeto != null) {
             localStorage.setItem("idUsuario", response.data.objeto.idUsuario);
             localStorage.setItem("usuario", response.data.objeto.nombre);
             localStorage.setItem("rol", response.data.objeto.rol);
-            EventBus.$emit('iniciarSesion');
-            this.$router.push({ name: "Inicio"})
+            EventBus.$emit("iniciarSesion");
+            this.$router.push({ name: "Inicio" });
           } else {
-            vm.mensajeAlerta = "Error en el servidor de AforoMex. Inténtelo de nuevo más tarde."
+            vm.mensajeAlerta =
+              "Error en el servidor de AforoMex. Inténtelo de nuevo más tarde.";
             vm.$bvModal.show("alerta");
           }
         })
         .catch((e) => {
           if (e.response.data.error && e.response.status == 401) {
-            vm.mensajeAlerta = e.response.data.mensaje + ". Revíselos e inténtelo de nuevo.";
+            vm.mensajeAlerta =
+              e.response.data.mensaje + ". Revíselos e inténtelo de nuevo.";
           } else {
-            vm.mensajeAlerta = "Error en el servidor de AforoMex. Inténtelo de nuevo más tarde."
+            vm.mensajeAlerta =
+              "Error en el servidor de AforoMex. Inténtelo de nuevo más tarde.";
           }
           vm.$bvModal.show("alerta");
         });
@@ -134,7 +111,8 @@ export default {
   margin-right: auto;
   margin-bottom: 100px;
 }
-p, h3 {
+p,
+h3 {
   margin-top: 8px;
 }
 </style>

@@ -1,50 +1,11 @@
 <template>
   <div>
     <br />
-    <h1>Registra tu propio negocio</h1>
+    <h1>Editar la información de tu negocio</h1>
     <br />
-    <!-- Formulario datos personales -->
-    <div class="contenedorFormulario" :hidden="ocultarPersonales">
-      <h5>Datos personales del administrador del negocio (paso 1 de 5)</h5>
-      <b-form @submit="onSubmitPersonales">
-        <div class="formulario">
-          <b-form-group class="add-style" id="grupoNombre" label="Nombre(s):" label-for="input-nombre">
-            <b-form-input id="input-nombre" v-model="form.nombre" placeholder="Ingresa tu nombre" maxlength="50" required></b-form-input>
-          </b-form-group>
-
-          <b-form-group class="add-style" id="grupoApellidos" label="Apellidos:" label-for="input-apellidos">
-            <b-form-input id="input-apellidos" v-model="form.apellidos" placeholder="Ingresa tus apellidos" maxlength="50" required></b-form-input>
-          </b-form-group>
-
-          <b-form-group class="add-style" id="grupoTelefono" label="Teléfono:" label-for="input-telefono" description="Solo números">
-            <b-form-input id="input-telefono" v-model="form.telefono" type="tel" placeholder="Ingresa tu número telefónico" 
-            maxlength="15" required pattern="[0-9]+">
-            </b-form-input>
-          </b-form-group>
-
-          <b-form-group class="add-style" id="grupoNacimiento" label="Fecha de Nacimiento:" label-for="input-nacimiento">
-            <b-form-input id="input-nacimiento" v-model="form.nacimiento" type="date" placeholder="Ingresa tu fecha de nacimiento" min="1900-01-01"
-              v-bind:max="hoy" required></b-form-input>
-          </b-form-group>
-
-          <b-form-group class="add-style" id="grupoCorreo" label="Correo electrónico:" label-for="input-correo"
-            description="Con este correo deberás iniciar sesión en Mi Negocio">
-            <b-form-input id="input-correo" v-model="form.correo" type="email" placeholder="Ingresa tu correo electrónico" maxlength="80" required>
-            </b-form-input>
-          </b-form-group>
-
-          <b-form-group class="add-style" id="grupoContrasena" label="Contraseña:" label-for="input-contrasena"
-            description="Con esta contraseña deberás iniciar sesión en Mi Negocio">
-            <b-form-input id="input-contrasena" v-model="form.contrasena" type="password" placeholder="Ingresa una contraseña" maxlength="50"
-              minlength="8" required></b-form-input>
-          </b-form-group>
-          <b-button class="botones" type="submit" variant="primary">Continuar</b-button>
-        </div>
-      </b-form>
-    </div>
     <!-- Formulario datos negocio -->
     <div class="contenedorFormulario" :hidden="ocultarDatosNegocio">
-      <h5>Datos de tu negocio (paso 2 de 5)</h5>
+      <h5>Datos de tu negocio (parte 1 de 4)</h5>
       <p>¡Atención: todos estos datos serán mostrados al público!</p>
       <b-form @submit="onSubmitNegocio">
         <div class="formulario">
@@ -88,7 +49,6 @@
             </b-form-input>
           </b-form-group>
 
-          <b-button class="botones" variant="secondary" v-on:click="regresarAdministrador">Regresar</b-button>
           <b-button class="botones" type="submit" variant="primary">Continuar</b-button>
         </div>
       </b-form>
@@ -96,7 +56,7 @@
 
     <!-- Formulario dirrección negocio -->
     <div class="contenedorFormulario" :hidden="ocultarDireccionNegocio">
-      <h5>Dirección de tu negocio (paso 3 de 5)</h5>
+      <h5>Dirección de tu negocio (parte 2 de 4)</h5>
       <p>¡Atención: todos estos datos serán mostrados al público!</p>
       <b-form @submit="onSubmitDireccion">
         <div class="formulario">
@@ -144,7 +104,7 @@
 
     <!-- Formulario horarios negocio -->
     <div class="contenedorFormulario" :hidden="ocultarHorariosNegocio">
-      <h5>Horarios de atención de tu negocio (paso 4 de 5)</h5>
+      <h5>Horarios de atención de tu negocio (parte 3 de 4)</h5>
       <p>¡Atención: todos estos datos serán mostrados al público!</p>
       <div class="formulario">
         <div class="add-style">
@@ -174,7 +134,7 @@
 
     <!-- Formulario aforo negocio -->
     <div class="contenedorFormulario" :hidden="ocultarAforoNegocio">
-      <h5>Aforo y reservaciones (paso 5 de 5)</h5>
+      <h5>Aforo y reservaciones (parte 4 de 4)</h5>
       <p>¡Atención: todos estos datos serán mostrados al público!</p>
       <b-form @submit="onSubmitAforo">
         <div class="formulario">
@@ -191,14 +151,14 @@
 
           <b-form-group class="add-style" label="Porcentaje del aforo para reservaciones:" label-for="input-porcentajeR"
             description="Es el porcentaje del aforo reservado para reservaciones exclusivamente">
-            <b-form-input id="input-porcentajeR" v-model="formNegocio.porcentajeReservaciones" placeholder="Ingresa el porcentaje (del 1 al 100)"
+            <b-form-input id="input-porcentajeR" v-model="formNegocio.aforoReservaciones" placeholder="Ingresa el porcentaje (del 1 al 100)"
               max="100" required type="number" min="1" :disabled="!formNegocio.permitirReservaciones">
             </b-form-input>
           </b-form-group>
 
           <b-form-group class="add-style" label="Limite de personas por reservación:" label-for="input-limiteR"
             description="Es el número límite de personas que pueden asistir en una sola reservación">
-            <b-form-input id="input-limiteR" v-model="formNegocio.limitePorReservacion" placeholder="Ingresa el numero de personas"
+            <b-form-input id="input-limiteR" v-model="formNegocio.limiteReservaciones" placeholder="Ingresa el numero de personas"
               :max="formNegocio.aforo" required type="number" min="1" :disabled="!formNegocio.permitirReservaciones">
             </b-form-input>
           </b-form-group>
@@ -211,6 +171,10 @@
 
     <b-modal id="alerta" centered ok-only title="Error" header-bg-variant="danger" header-text-variant="light">
       <p class="my-4"> {{ mensajeAlerta }}</p>
+    </b-modal>
+
+    <b-modal id="alertaExito" centered ok-only title="Éxito al guardar los cambios" header-bg-variant="success" header-text-variant="light">
+      <p class="my-4">Cambios de los datos del negocio guardados con éxito.</p>
     </b-modal>
 
   </div>
@@ -226,16 +190,7 @@ export default {
     return {
       hoy: new Date().toISOString().slice(0, 10),
       mensajeAlerta: "",
-      ocultarPersonales: false,
-      form: {
-        nombre: "",
-        apellidos: "",
-        telefono: "",
-        correo: "",
-        nacimiento: "",
-        contrasena: "",
-      },
-      ocultarDatosNegocio: true,
+      ocultarDatosNegocio: false,
       formNegocio: {
         nombre: "",
         categoria: "",
@@ -247,8 +202,8 @@ export default {
         facebook: "",
         aforo: 0,
         permitirReservaciones: false,
-        porcentajeReservaciones: "",
-        limitePorReservacion: "",
+        aforoReservaciones: "",
+        limiteReservaciones: "",
       },
       ocultarDireccionNegocio: true,
       formDireccion: {
@@ -296,39 +251,32 @@ export default {
       ocultarAforoNegocio: true,
     };
   },
+  created: function () {
+    var vm = this;
+    axios
+      .get(
+        "https://localhost:5001/AforoMex/Negocios/" + localStorage["idNegocio"]
+      )
+      .then(function (response) {
+        response.data.aforoReservaciones = response.data.aforoReservaciones*100;
+        vm.formNegocio = response.data;
+        vm.formDireccion = response.data.direcciones[0];
+        vm.cargarHorarios(response.data.horarios);
+        vm.buscarPorCP();
+      })
+      .catch(function () {
+        vm.mensajeAlerta =
+          "Error con el servidor de AforoMex al cargar los datos de su negocio. Inténtelo de nuevo más tarde.";
+        vm.$bvModal.show("alerta");
+      });
+  },
 
   methods: {
-    //Funciones datos del administrador
-    onSubmitPersonales(event) {
-      event.preventDefault();
-      var vm = this;
-      axios
-        .post("https://localhost:5001/AforoMex/Usuarios/verificarCorreo", {
-          correo: vm.form.correo,
-        })
-        .then(() => {
-          vm.ocultarDatosNegocio = false;
-          vm.ocultarPersonales = true;
-        })
-        .catch((e) => {
-          if (e.response.data.error && e.response.status == 409) {
-            vm.mensajeAlerta = e.response.data.mensaje;
-          } else {
-            vm.mensajeAlerta =
-              "Error en el servidor de AforoMex. Inténtelo de nuevo más tarde.";
-          }
-          vm.$bvModal.show("alerta");
-        });
-    },
     //Funciones datos del negocio
     onSubmitNegocio(event) {
       event.preventDefault();
       this.ocultarDatosNegocio = true;
       this.ocultarDireccionNegocio = false;
-    },
-    regresarAdministrador: function () {
-      this.ocultarDatosNegocio = true;
-      this.ocultarPersonales = false;
     },
     //Funciones dirección del negocio
     onSubmitDireccion(event) {
@@ -366,14 +314,26 @@ export default {
           vm.formDireccion.estado = "";
           vm.colonias = [];
           if (error.response.data.code_error == 105) {
-            vm.mensajeAlerta = "No existe ese código postal. Corrígelo e inténtalo de nuevo.";
+            alert(
+              "No existe ese código postal. Corrígelo e inténtalo de nuevo"
+            );
           } else {
-            vm.mensajeAlerta ="Formato de código postal inválido. Corrígelo e inténtalo de nuevo.";
+            alert(
+              "Error al conectar con el servidor. Revise su conexión a internet e inténtelo de nuevo"
+            );
           }
-          vm.$bvModal.show("alerta");
         });
     },
     //Funciones horario del negocio
+    cargarHorarios: function (horarios) {
+      horarios.forEach((horario) => {
+        var indice = this.horarios.findIndex(
+          (o) => o.dia === horario.dia
+        );
+        this.horarios[indice].horaInicio = horario.horaInicio.slice(0, 5);
+        this.horarios[indice].horaFin = horario.horaFin.slice(0, 5);
+      });
+    },
     onSubmitHorario(event) {
       event.preventDefault();
       var nuevoDia = Object.assign({}, this.formHorario);
@@ -427,15 +387,15 @@ export default {
     },
     onSubmitAforo(event) {
       event.preventDefault();
-      this.registrarNegocio();
+      this.editarNegocio();
     },
-    registrarNegocio: function () {
+    editarNegocio: function () {
       let horariosVerificados = this.horarios.filter(
         (horario) => horario.horaInicio != "" && horario.horaFin != ""
       );
       if (!this.formNegocio.permitirReservaciones) {
-        this.formNegocio.porcentajeReservaciones = 0;
-        this.formNegocio.limitePorReservacion = 0;
+        this.formNegocio.aforoReservaciones = 0;
+        this.formNegocio.limiteReservaciones = 0;
       }
       if (this.formDireccion.numeroInterior == "") {
         this.formDireccion.numeroInterior = 0;
@@ -449,43 +409,40 @@ export default {
       );
       var vm = this;
       axios
-        .post("https://localhost:5001/AforoMex/Negocios", {
-          nombre: this.formNegocio.nombre,
-          categoria: this.formNegocio.categoria,
-          telefono: this.formNegocio.telefono,
-          correo: this.formNegocio.correo,
-          sitioWeb: this.formNegocio.sitioWeb,
-          celular: this.formNegocio.celular,
-          descripcion: this.formNegocio.descripcion,
-          facebook: this.formNegocio.facebook,
-          aforo: parseInt(this.formNegocio.aforo),
-          permitirReservaciones: this.formNegocio.permitirReservaciones,
-          aforoReservaciones:
-            parseFloat(this.formNegocio.porcentajeReservaciones) / 100,
-          limiteReservaciones: parseInt(this.formNegocio.limitePorReservacion),
-          idUsuario: parseInt(localStorage["idUsuario"]),
-          direcciones: [this.formDireccion],
-          horarios: horariosVerificados,
-          idUsuarioNavigation: {
-            Nombre: this.form.nombre,
-            apellidos: this.form.apellidos,
-            telefono: this.form.telefono,
-            correo: this.form.correo,
-            fechaNacimiento: this.form.nacimiento,
-            contrasena: this.form.contrasena,
-          },
-        })
-        .then((response) => {
-          localStorage.setItem("idUsuario", response.data.idUsuarioNavigation.idUsuario);
-          localStorage.setItem("usuario", response.data.nombre);
-          localStorage.setItem("rol", response.data.idUsuarioNavigation.rol);
-          localStorage.setItem("idNegocio", response.data.idNegocio);
+        .put(
+          "https://localhost:5001/AforoMex/Negocios/" +
+            localStorage["idNegocio"],
+          {
+            idNegocio: this.formNegocio.idNegocio,
+            nombre: this.formNegocio.nombre,
+            categoria: this.formNegocio.categoria,
+            telefono: this.formNegocio.telefono,
+            correo: this.formNegocio.correo,
+            sitioWeb: this.formNegocio.sitioWeb,
+            celular: this.formNegocio.celular,
+            descripcion: this.formNegocio.descripcion,
+            facebook: this.formNegocio.facebook,
+            aforo: parseInt(this.formNegocio.aforo),
+            permitirReservaciones: this.formNegocio.permitirReservaciones,
+            aforoReservaciones:
+              parseFloat(this.formNegocio.aforoReservaciones) / 100,
+            limiteReservaciones: parseInt(
+              this.formNegocio.limiteReservaciones
+            ),
+            cupoOcupado: this.formNegocio.cupoOcupado,
+            idUsuario: parseInt(localStorage["idUsuario"]),
+            direcciones: [this.formDireccion],
+            horarios: horariosVerificados,
+          }
+        )
+        .then(() => {
+          localStorage.setItem("usuario", vm.formNegocio.nombre);
           EventBus.$emit("iniciarSesion");
-          this.$router.push({ name: "Inicio" });
+          vm.$router.push({ name: "VerNegocio", params: { id: vm.formNegocio.idNegocio } });
         })
         .catch(() => {
           vm.mensajeAlerta =
-            "Error en el servidor de AforoMex. Inténtelo de nuevo más tarde.";
+            "Error al guardar los cambios al servidor de AforoMex. Inténtelo de nuevo más tarde.";
           vm.$bvModal.show("alerta");
         });
     },

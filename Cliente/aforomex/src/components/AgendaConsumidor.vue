@@ -8,18 +8,28 @@
           <span>{{ data.value }}</span>
         </template>
         <template #cell()="data">
-          <div class="celda" v-for="reservacion in data.value" v-bind:key="reservacion.idReservacion">
+          <div class="celda" v-for="reservacion in data.value" v-bind:key="reservacion.idReservacion" v-on:click="verReservacion(reservacion)">
             <router-link :to="{ name: 'VerNegocio', params: { id: reservacion.idNegocio }}"><span><b>{{ reservacion.negocio }}</b>
               </span></router-link><br>
-            <span>Hora: {{ reservacion.hora }}</span><br>
-            <span>Lugares reservados: {{ reservacion.numLugares }}</span>
-            <span v-if="reservacion.estado == false"><br>Cancelada</span>
+            <span>Hora: {{ reservacion.hora }}</span>
+            <span v-if="reservacion.estado == 'Cancelada'"><br>{{ reservacion.estado }}</span>
           </div>
         </template>
       </b-table>
     </div>
 
-    <b-modal id="alerta" centered ok-only title="Error al cargar las reservaciones" header-bg-variant="danger" header-text-variant="light">
+    <b-modal id="reservacion" centered ok-only :title="reservacionSeleccionada.negocio" header-bg-variant="primary" size="sm"
+      header-text-variant="light">
+      <p>Fecha y hora: <b>{{ reservacionSeleccionada.fecha}} {{ reservacionSeleccionada.hora}}</b></p>
+      <p>No. de lugares reservados: <b>{{ reservacionSeleccionada.numLugares}}</b></p>
+      <p>Estado de la reservación: <b>{{ reservacionSeleccionada.estado}}</b></p><br>
+      <div class="botonCentrado">
+        <b-button v-if="reservacionSeleccionada.estado != 'Cancelada'" variant="outline-info" pill v-on:click="cancelarReservacion">
+          Cancelar reservacion</b-button>
+      </div>
+    </b-modal>
+
+    <b-modal id="alerta" centered ok-only title="Error al conectar con el servidor" header-bg-variant="danger" header-text-variant="light">
       <p class="my-4">Revise su conexión a internet e inténtelo de nuevo.</p>
     </b-modal>
   </div>
@@ -45,6 +55,7 @@ export default {
       columnas: ["hora"],
       horas: [],
       reservaciones: [],
+      reservacionSeleccionada: {},
     };
   },
   created: function () {
@@ -59,9 +70,8 @@ export default {
         vm.reservaciones = response.data;
         vm.cargarTabla();
       })
-      .catch(function (error) {
+      .catch(function () {
         vm.$bvModal.show("alerta");
-        console.log(error);
       });
   },
   methods: {
@@ -108,8 +118,49 @@ export default {
           estado: reservacion.estado,
           idNegocio: reservacion.idNegocio,
           numLugares: reservacion.numLugares,
+          fecha: this.$luxon(fecha.toISOString(), "dd/MM/yyyy"),
         });
       });
+    },
+    verReservacion: function (reservacion) {
+      this.reservacionSeleccionada = reservacion;
+      this.$bvModal.show("reservacion");
+    },
+    cancelarReservacion: function () {
+      this.$bvModal
+        .msgBoxConfirm(
+          "¿Estás seguro de cancelar esta reservación? (No podrá revertirse)",
+          {
+            title: "Confirmar",
+            size: "sm",
+            okVariant: "danger",
+            okTitle: "Sí",
+            cancelTitle: "No",
+          }
+        )
+        .then((value) => {
+          if (value) {
+            this.mandarCancelacion();
+          }
+        })
+        .catch(() => {});
+    },
+    mandarCancelacion: function () {
+      var vm = this;
+      axios
+        .put(
+          "https://localhost:5001/AforoMex/Usuarios/cancelarReservacion/" +
+            vm.reservacionSeleccionada.idReservacion,
+          {
+            idUsuario: localStorage["idUsuario"],
+          }
+        )
+        .then(() => {
+          vm.reservacionSeleccionada.estado = "Cancelada";
+        })
+        .catch(() => {
+          vm.$bvModal.show("alerta");
+        });
     },
   },
 };
@@ -147,5 +198,11 @@ h1 {
 }
 .celda:hover {
   background-color: lightgray;
+  cursor: pointer;
+}
+.botonCentrado {
+  margin-left: auto;
+  margin-right: auto;
+  width: fit-content;
 }
 </style>

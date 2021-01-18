@@ -1,6 +1,11 @@
 <template>
   <div>
     <h1>{{ negocio.nombre }}</h1>
+    <div v-if="idNegocio==idUsuarioNegocio" class="botonEditar">
+      <br>
+      <b-button variant="info" :to="{ name: 'EditarNegocio' }">Editar información</b-button>
+    </div>
+
     <div id="contenedorNegocio">
       <div class="datosNegocio">
         <h5>Datos generales</h5>
@@ -48,7 +53,7 @@ export default {
   data() {
     return {
       idNegocio: this.$route.params.id,
-      negocio: {},
+      negocio: { direcciones: [ {}, ] },
       columnasHorarios: [
         { key: "dia", label: "Día de la semama" },
         { key: "horaInicio", label: "Hora de apertura" },
@@ -56,9 +61,13 @@ export default {
       ],
       cupoDisSinReservacion: "",
       aforoSinReservacion: "",
+      idUsuarioNegocio: "",
     };
   },
   created: function () {
+    if (localStorage["idNegocio"] != null) {
+      this.idUsuarioNegocio = localStorage["idNegocio"];
+    }
     var vm = this;
     axios
       .get("https://localhost:5001/AforoMex/Negocios/" + this.idNegocio)
@@ -118,5 +127,9 @@ export default {
 }
 h1 {
   margin-top: 40px;
+}
+.botonEditar {
+  text-align: left;
+  margin-left: 5%;
 }
 </style>

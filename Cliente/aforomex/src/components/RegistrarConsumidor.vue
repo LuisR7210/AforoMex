@@ -13,8 +13,9 @@
             <b-form-input id="input-apellidos" v-model="form.apellidos" placeholder="Ingresa tus apellidos" maxlength="50" required></b-form-input>
           </b-form-group>
 
-          <b-form-group class="add-style" id="grupoTelefono" label="Teléfono:" label-for="input-telefono">
-            <b-form-input id="input-telefono" v-model="form.telefono" type="tel" placeholder="Ingresa tu número telefónico" maxlength="15" required>
+          <b-form-group class="add-style" id="grupoTelefono" label="Teléfono:" label-for="input-telefono" description="Solo números">
+            <b-form-input id="input-telefono" v-model="form.telefono" type="tel" placeholder="Ingresa tu número telefónico" 
+            maxlength="15" required pattern="[0-9]+">
             </b-form-input>
           </b-form-group>
 
@@ -37,7 +38,7 @@
       </b-form>
     </div>
 
-    <b-modal id="alerta" centered ok-only title="Error al cargar las reservaciones" header-bg-variant="danger" header-text-variant="light">
+    <b-modal id="alerta" centered ok-only title="Error al registrarse" header-bg-variant="danger" header-text-variant="light">
       <p class="my-4">{{ mensajeAlerta }}</p>
     </b-modal>
   </div>
@@ -75,8 +76,7 @@ export default {
           Telefono: this.form.telefono,
           Correo: this.form.correo,
           FechaNacimiento: this.form.nacimiento,
-          Contrasena: this.form.contrasena,
-          Rol: "consumidor",
+          Contrasena: this.form.contrasena
         })
         .then((response) => {
           localStorage.setItem("idUsuario", response.data.objeto.idUsuario);

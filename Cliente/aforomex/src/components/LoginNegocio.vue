@@ -92,9 +92,10 @@ export default {
         })
         .then((response) => {
           if (response.data.objeto != null) {
-            localStorage.setItem("idUsuario", response.data.objeto.idNegocio);
+            localStorage.setItem("idUsuario", response.data.objeto.idUsuarioNavigation.idUsuario);
             localStorage.setItem("usuario", response.data.objeto.nombre);
             localStorage.setItem("rol", response.data.objeto.idUsuarioNavigation.rol);
+            localStorage.setItem("idNegocio", response.data.objeto.idNegocio);
             EventBus.$emit('iniciarSesion');
             this.$router.push({ name: "Inicio"})
           } else {

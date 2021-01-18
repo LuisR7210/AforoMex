@@ -31,10 +31,6 @@
       </b-form>
       <b-table id="tablaReservaciones" hover :items="reservacionesTabla" responsive :fields="columnas" :per-page="perPage"
         :current-page="currentPage">
-        <template #cell(estado)="data">
-          <span v-if="data.value == true">En curso</span>
-          <span v-if="data.value == false">Cancelada</span>
-        </template>
       </b-table>
       <b-pagination v-model="currentPage" :total-rows="rows" :per-page="perPage" aria-controls="tablaReservaciones" align="center">
       </b-pagination>
@@ -79,7 +75,7 @@ export default {
       axios
         .get("https://localhost:5001/AforoMex/Negocios/reservaciones/", {
           params: {
-            idNegocio: localStorage["idUsuario"],
+            idNegocio: localStorage["idNegocio"],
             fechaConsulta: vm.fechaConsulta,
             periodo: vm.periodoSeleccionado,
             fechaFin: vm.fechaFin,
@@ -139,7 +135,7 @@ h1 {
   margin-top: 40px;
 }
 .busquedas {
-  width: 700px;
+  max-width: 700px;
   margin-bottom: 30px;
   display: flex;
   flex-wrap: wrap;

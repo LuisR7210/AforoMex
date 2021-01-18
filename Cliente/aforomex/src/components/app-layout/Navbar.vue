@@ -19,9 +19,9 @@
       <b-collapse id="navbarColapsada" is-nav>
 
         <b-input-group id="barraBusqueda">
-          <b-form-input placeholder="Busca un negocio por su nombre"></b-form-input>
+          <b-form-input placeholder="Busca un negocio por su nombre" v-model="busqueda"></b-form-input>
           <b-input-group-append>
-            <b-button variant="outline-warning">
+            <b-button variant="outline-warning" v-on:click="buscarNegociosBarra">
               <b-icon icon="search"></b-icon>
             </b-button>
           </b-input-group-append>
@@ -33,8 +33,9 @@
           </b-button>
 
           <b-nav-item-dropdown :text="usuario" toggle-class="text-light" :hidden="!ocultarBtnLogin" right>
-            <b-dropdown-item :hidden="ocultarNegocio">Mi negocio</b-dropdown-item>
-            <b-dropdown-item href="#">Mi perfil</b-dropdown-item>
+            <b-dropdown-item :hidden="ocultarNegocio" :to="{ name: 'VerNegocio', params: { id: idNegocio }}">Mi negocio
+            </b-dropdown-item>
+            <b-dropdown-item :to="{ name: 'PerfilUsuario' }">Mi perfil</b-dropdown-item>
             <b-dropdown-item v-on:click="cerrarSesion">Cerrar sesión</b-dropdown-item>
           </b-nav-item-dropdown>
         </b-navbar-nav>
@@ -56,7 +57,7 @@
         <b-nav-item :to="{ name: 'AgendaConsumidor' }" link-classes="text-light">Ver mi agenda</b-nav-item>
       </b-nav>
       <b-nav vertical :hidden="ocultarNegocio">
-        <b-nav-item link-classes="text-light">Actualizar cupo</b-nav-item>
+        <b-nav-item :to="{ name: 'ActualizarCupo' }" link-classes="text-light">Actualizar cupo</b-nav-item>
         <b-nav-item :to="{ name: 'AgendaNegocio' }" link-classes="text-light">Ver Agenda del negocio</b-nav-item>
       </b-nav>
     </b-sidebar>
@@ -73,6 +74,9 @@ export default {
       ocultarBtnLogin: false,
       ocultarNegocio: true,
       usuario: "Usuario",
+      idNegocio: "0",
+      idUsuario: "0",
+      busqueda: "",
     };
   },
   created: function () {
@@ -90,8 +94,10 @@ export default {
       ) {
         this.ocultarBtnLogin = true;
         this.usuario = localStorage["usuario"];
+        this.idUsuario = localStorage["idUsuario"];
         if (localStorage["rol"] == "negocio") {
           this.ocultarNegocio = false;
+          this.idNegocio = localStorage["idNegocio"];
         } else {
           this.ocultarNegocio = true;
         }
@@ -103,7 +109,17 @@ export default {
       localStorage.removeItem("correo");
       localStorage.removeItem("idUsuario");
       localStorage.removeItem("rol");
+      localStorage.removeItem("idNegocio");
       this.iniciarSesion();
+    },
+    buscarNegociosBarra: function () {
+      if (this.busqueda == "") {
+        return;
+      }
+      if (this.$route.name != "Inicio") {
+        this.$router.push({ name: "Inicio" });
+      }
+      EventBus.$emit("buscarNegocios", this.busqueda);
     },
   },
 };
