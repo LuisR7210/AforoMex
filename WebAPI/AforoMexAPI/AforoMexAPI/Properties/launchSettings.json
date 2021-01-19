@@ -25,6 +25,15 @@
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
       }
+    },
+    "Hamachi": {
+      "commandName": "Project",
+      "launchBrowser": true,
+      "launchUrl": "AforoMex/Usuarios",
+      "applicationUrl": "https://25.29.172.40:5001;http://25.29.172.40:5000",
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      }
     }
   }
 }

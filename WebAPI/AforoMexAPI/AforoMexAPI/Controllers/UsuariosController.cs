@@ -38,7 +38,7 @@ namespace AforoMexAPI.Controllers
             {
                 return NotFound();
             }
-
+            usuario.Contrasena = null;
             return usuario;
         }
 
@@ -51,6 +51,7 @@ namespace AforoMexAPI.Controllers
                 return BadRequest();
             }
             usuario.Rol = "consumidor";
+            usuario.Contrasena = this.ObtenerHash(usuario.Contrasena);
             _context.Entry(usuario).State = EntityState.Modified;
 
             try
@@ -126,7 +127,7 @@ namespace AforoMexAPI.Controllers
                 if (!contreseñaHasheada.Equals(usuarioEncontrado.Contrasena))
                 {
                     mensaje.error = true;
-                    mensaje.mensaje = "Contraseña inválida";
+                    mensaje.mensaje = "Contraseña inválida" + usuarioEncontrado.Contrasena + contreseñaHasheada;
                     return StatusCode(StatusCodes.Status401Unauthorized, mensaje);
                 }
                 if (usuarioEncontrado.Rol.Equals("consumidor"))

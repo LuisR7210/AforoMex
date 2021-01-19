@@ -34,7 +34,7 @@ namespace AforoMexAPI
         {
             app.UseCors(options =>
             {
-                options.WithOrigins("http://localhost:8080");
+                options.WithOrigins("http://25.29.172.40:8080", "http://localhost:8081", "http://25.82.44.253:8080", "http://localhost:8080");
                 options.AllowAnyMethod();
                 options.AllowAnyHeader();
             });
